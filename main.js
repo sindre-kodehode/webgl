@@ -26,10 +26,12 @@ const fragmentShaderSource =
 
 precision highp float;
 
+uniform vec4 u_Color;
+
 out vec4 outColor;
 
 void main() {
-  outColor = vec4( 1, 0, 0.5, 1 );
+  outColor = u_Color;
 }
 `;
 
@@ -70,6 +72,28 @@ const createProgram = ( gl, vertexShader, fragmentShader ) => {
   gl.deleteProgram( program );
 };
 
+/*******************************************************************************
+*  create rectangle                                                            *
+*******************************************************************************/
+const createRectangle = ( gl, x, y, width, height ) => {
+  const x1 = x;
+  const x2 = x + width;
+  const y1 = y;
+  const y2 = y + height;
+
+  gl.bufferData(
+    gl.ARRAY_BUFFER,
+    new Float32Array([
+      x1, y1,
+      x2, y1,
+      x1, y2,
+      x1, y2,
+      x2, y1,
+      x2, y2,
+    ]),
+    gl.STATIC_DRAW
+  );
+}
 
 /*******************************************************************************
 *  main                                                                        *
@@ -109,6 +133,11 @@ const main = () => {
   const positionAttributeLocation = gl.getAttribLocation(
     program,
     "a_Position"
+  );
+
+  const colorAttributeLocation = gl.getUniformLocation(
+    program,
+    "u_Color"
   );
 
   const positionBuffer = gl.createBuffer();
@@ -157,7 +186,25 @@ const main = () => {
     gl.canvas.height
   );
 
-  {
+  const randomInt = range => Math.floor( Math.random() * range );
+
+  for ( let i = 0; i < 50; i++ ) {
+    createRectangle(
+      gl,
+      randomInt( 300 ),
+      randomInt( 300 ),
+      randomInt( 300 ),
+      randomInt( 300 ),
+    )
+
+    gl.uniform4f(
+      colorAttributeLocation,
+      Math.random(),
+      Math.random(),
+      Math.random(),
+      1.0
+    );
+
     const primitiveType = gl.TRIANGLES;
     const offset        = 0;
     const count         = 6;

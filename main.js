@@ -4,10 +4,16 @@
 const vertexShaderSource =
 `#version 300 es
 
-in vec4 a_Position;
+in vec2 a_Position;
+
+uniform vec2 u_Resolution;
 
 void main() {
-  gl_Position = a_Position;
+  vec2 zeroToOne = a_Position / u_Resolution;
+  vec2 zeroToTwo = zeroToOne * 2.0;
+  vec2 clipSpace = zeroToTwo - 1.0;
+
+  gl_Position = vec4( clipSpace * vec2( 1, -1 ), 0, 1 );
 }
 `;
 
@@ -82,15 +88,22 @@ const main = () => {
     gl.VERTEX_SHADER,
     vertexShaderSource
   );
+
   const fragmentShader = createShader(
     gl,
     gl.FRAGMENT_SHADER,
     fragmentShaderSource
   );
+
   const program = createProgram(
     gl,
     vertexShader,
     fragmentShader
+  );
+
+  const resolutionUniformLocation = gl.getUniformLocation(
+    program,
+    "u_Resolution"
   );
 
   const positionAttributeLocation = gl.getAttribLocation(
@@ -102,9 +115,12 @@ const main = () => {
   gl.bindBuffer( gl.ARRAY_BUFFER, positionBuffer );
 
   const positions = new Float32Array([
-    0.0, 0.0,
-    0.0, 0.5,
-    0.7, 0.0,
+    10, 20,
+    80, 20,
+    10, 30,
+    10, 30,
+    80, 20,
+    80, 30,
   ]);
 
   gl.bufferData( gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW );
@@ -135,10 +151,16 @@ const main = () => {
   gl.clear( gl.COLOR_BUFFER_BIT );
   gl.useProgram( program );
 
+  gl.uniform2f(
+    resolutionUniformLocation,
+    gl.canvas.width,
+    gl.canvas.height
+  );
+
   {
     const primitiveType = gl.TRIANGLES;
     const offset        = 0;
-    const count         = 3;
+    const count         = 6;
 
     gl.drawArrays( primitiveType, offset, count );
   }

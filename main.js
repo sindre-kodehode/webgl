@@ -1,5 +1,7 @@
 import { vsSource, fsSource } from "./shaders.js";
 import { VertexShader, FragmentShader } from "./Shader.js";
+import VertexBuffer from "./VertexBuffer.js";
+import IndexBuffer  from "./IndexBuffer.js";
 
 /*******************************************************************************
 *  create program                                                              *
@@ -35,18 +37,14 @@ const main = () => {
   gl.viewport( 0, 0, gl.canvas.width, gl.canvas.height );
 
   // *** compile shaders and create program *** //
-  const vertexShader   = new VertexShader( gl, vsSource );
-  const fragmentShader = new FragmentShader( gl, fsSource );
+  const vs = new VertexShader(   gl, vsSource );
+  const fs = new FragmentShader( gl, fsSource );
 
-  const program = createProgram(
-    gl,
-    vertexShader.compile(),
-    fragmentShader.compile()
-  );
+  const program = createProgram( gl, vs.compile(), fs.compile() );
 
   gl.useProgram( program );
 
-  // *** position buffer *** //
+  // *** buffer data *** //
   const positions = new Float32Array([
     -0.5, -0.5,
      0.5, -0.5,
@@ -54,15 +52,26 @@ const main = () => {
     -0.5,  0.5,
   ]);
 
-  const positionBuffer = gl.createBuffer();
-  gl.bindBuffer( gl.ARRAY_BUFFER, positionBuffer );
-  gl.bufferData( gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW );
+  const indices = new Uint32Array([
+    0, 1, 2,
+    2, 3, 0,
+  ]);
 
-  // *** vertex array object *** //
+  // *** attribute locations *** //
+  const positionLocation = gl.getAttribLocation( program, "a_Position" );
+
+  // *** uniform locations *** //
+  const colorLocation = gl.getUniformLocation( program, "u_Color" );
+
+  // *** create and bind buffers *** //
   const vertexArray = gl.createVertexArray();
   gl.bindVertexArray( vertexArray );
-  gl.enableVertexAttribArray( 0 );
+  gl.enableVertexAttribArray( positionLocation );
 
+  const ib = new IndexBuffer(  gl, indices   );
+  const vb = new VertexBuffer( gl, positions );
+
+  // *** specify vertex buffer *** //
   {
     const size      = 2;
     const type      = gl.FLOAT;
@@ -71,7 +80,7 @@ const main = () => {
     const offset    = 0;
 
     gl.vertexAttribPointer(
-      0,
+      positionLocation,
       size,
       type,
       normalize,
@@ -80,22 +89,9 @@ const main = () => {
     );
   }
 
-  // *** index buffer object *** //
-  const indices = new Uint32Array([
-    0, 1, 2,
-    2, 3, 0,
-  ]);
-
-  const indexBuffer = gl.createBuffer();
-  gl.bindBuffer( gl.ELEMENT_ARRAY_BUFFER, indexBuffer );
-  gl.bufferData( gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW );
-
-  // *** color uniform *** //
-  const colorLocation = gl.getUniformLocation( program, "u_Color" );
-
   // *** render loop *** //
   let then      = 0;
-  let r         = 0.0;
+  let red       = 0.0;
   let increment = 0.02;
 
   const render = now => {
@@ -106,29 +102,31 @@ const main = () => {
     then = now;
 
     // *** draw scene *** //
-    gl.uniform4fv(
-      colorLocation,
-      new Float32Array([ r, 0.3, 0.8, 1.0 ])
-    );
-
     gl.clearColor( 0, 0, 0, 1.0 )  ;
     gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
 
-    const primitiveType = gl.TRIANGLES;
-    const offset        = 0;
-    const count         = 6;
-    const indexType     = gl.UNSIGNED_INT;
+    gl.uniform4fv(
+      colorLocation,
+      new Float32Array([ red, 0.3, 0.8, 1.0 ])
+    );
 
-    gl.drawElements( primitiveType, count, indexType, offset);
+    {
+      const primitiveType = gl.TRIANGLES;
+      const offset        = 0;
+      const count         = 6;
+      const indexType     = gl.UNSIGNED_INT;
+
+      gl.drawElements( primitiveType, count, indexType, offset);
+    }
     
-    if ( r > 1.0 ) {
+    if ( red > 1.0 ) {
       increment = -0.02;
     }
-    else if ( r < 0.0 ) {
+    else if ( red < 0.0 ) {
       increment = 0.02;
     }
 
-    r += increment;
+    red += increment;
   };
 
   requestAnimationFrame( render );

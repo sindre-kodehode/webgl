@@ -52,7 +52,6 @@ const main = () => {
   const colorLocation = gl.getUniformLocation( program.programId, "u_Color" );
 
   // *** render loop *** //
-  let then      = 0;
   let red       = 0.0;
   let increment = 0.02;
 
@@ -62,6 +61,9 @@ const main = () => {
     // *** draw scene *** //
     gl.clearColor( 0, 0, 0, 1.0 )  ;
     gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
+
+    va.bind();
+    ib.bind();
 
     gl.uniform4fv(
       colorLocation,

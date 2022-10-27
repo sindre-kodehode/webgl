@@ -13,7 +13,7 @@ export default class {
       size       : 4
     })
     
-    this.stride += 4;
+    this.stride += 4 * count;
   }
 
   pushUint( count ) {
@@ -24,6 +24,6 @@ export default class {
       size       : 4
     })
 
-    this.stride += 4;
+    this.stride += 4 * count;
   }
 }

@@ -33,8 +33,6 @@ const main = () => {
 
   // *** initialize viewport *** //
   gl.viewport( 0, 0, gl.canvas.width, gl.canvas.height );
-  gl.clearColor( 0, 0, 0, 1.0 )  ;
-  gl.clear( gl.COLOR_BUFFER_BIT );
 
   // *** compile shaders and create program *** //
   const vertexShader   = new VertexShader( gl, vsSource );
@@ -92,15 +90,48 @@ const main = () => {
   gl.bindBuffer( gl.ELEMENT_ARRAY_BUFFER, indexBuffer );
   gl.bufferData( gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW );
 
-  // *** draw scene *** //
-  {
+  // *** color uniform *** //
+  const colorLocation = gl.getUniformLocation( program, "u_Color" );
+
+  // *** render loop *** //
+  let then      = 0;
+  let r         = 0.0;
+  let increment = 0.02;
+
+  const render = now => {
+    requestAnimationFrame( render );
+
+    now *= 0.001;
+    const deltaTime = now - then;
+    then = now;
+
+    // *** draw scene *** //
+    gl.uniform4fv(
+      colorLocation,
+      new Float32Array([ r, 0.3, 0.8, 1.0 ])
+    );
+
+    gl.clearColor( 0, 0, 0, 1.0 )  ;
+    gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
+
     const primitiveType = gl.TRIANGLES;
     const offset        = 0;
     const count         = 6;
     const indexType     = gl.UNSIGNED_INT;
 
     gl.drawElements( primitiveType, count, indexType, offset);
-  }
+    
+    if ( r > 1.0 ) {
+      increment = -0.02;
+    }
+    else if ( r < 0.0 ) {
+      increment = 0.02;
+    }
+
+    r += increment;
+  };
+
+  requestAnimationFrame( render );
 };
 
 window.addEventListener( "load", main );

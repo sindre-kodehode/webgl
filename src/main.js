@@ -1,9 +1,11 @@
-import vsSource       from "./VertexShaderSource.js";
-import fsSource       from "./FragmentShaderSource.js";
-import VertexShader   from "./VertexShader.js";
-import FragmentShader from "./FragmentShader.js";
-import VertexBuffer   from "./VertexBuffer.js";
-import IndexBuffer    from "./IndexBuffer.js";
+import fsSource           from "./FragmentShaderSource.js";
+import vsSource           from "./VertexShaderSource.js";
+import FragmentShader     from "./FragmentShader.js";
+import IndexBuffer        from "./IndexBuffer.js";
+import VertexArray        from "./VertexArray.js";
+import VertexBuffer       from "./VertexBuffer.js";
+import VertexBufferLayout from "./VertexBufferLayout.js";
+import VertexShader       from "./VertexShader.js";
 
 /*******************************************************************************
 *  create program                                                              *
@@ -58,37 +60,18 @@ const main = () => {
     2, 3, 0,
   ]);
 
-  // *** attribute locations *** //
-  const positionLocation = gl.getAttribLocation( program, "a_Position" );
+  // *** create and bind buffers *** //
+  const va     = new VertexArray( gl );
+  const layout = new VertexBufferLayout( gl );
+  const vb     = new VertexBuffer( gl, positions );
+
+  layout.pushFloat( 2 );
+  va.addBuffer( vb, layout );
+
+  const ib = new IndexBuffer(  gl, indices   );
 
   // *** uniform locations *** //
   const colorLocation = gl.getUniformLocation( program, "u_Color" );
-
-  // *** create and bind buffers *** //
-  const vertexArray = gl.createVertexArray();
-  gl.bindVertexArray( vertexArray );
-  gl.enableVertexAttribArray( positionLocation );
-
-  const ib = new IndexBuffer(  gl, indices   );
-  const vb = new VertexBuffer( gl, positions );
-
-  // *** specify vertex buffer *** //
-  {
-    const size      = 2;
-    const type      = gl.FLOAT;
-    const normalize = false;
-    const stride    = 0;
-    const offset    = 0;
-
-    gl.vertexAttribPointer(
-      positionLocation,
-      size,
-      type,
-      normalize,
-      stride,
-      offset
-    );
-  }
 
   // *** render loop *** //
   let then      = 0;

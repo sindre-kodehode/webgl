@@ -1,7 +1,9 @@
-import { vsSource, fsSource } from "./shaders.js";
-import { VertexShader, FragmentShader } from "./Shader.js";
-import VertexBuffer from "./VertexBuffer.js";
-import IndexBuffer  from "./IndexBuffer.js";
+import vsSource       from "./VertexShaderSource.js";
+import fsSource       from "./FragmentShaderSource.js";
+import VertexShader   from "./VertexShader.js";
+import FragmentShader from "./FragmentShader.js";
+import VertexBuffer   from "./VertexBuffer.js";
+import IndexBuffer    from "./IndexBuffer.js";
 
 /*******************************************************************************
 *  create program                                                              *
@@ -40,8 +42,7 @@ const main = () => {
   const vs = new VertexShader(   gl, vsSource );
   const fs = new FragmentShader( gl, fsSource );
 
-  const program = createProgram( gl, vs.compile(), fs.compile() );
-
+  const program = createProgram( gl, vs.shaderId, fs.shaderId );
   gl.useProgram( program );
 
   // *** buffer data *** //

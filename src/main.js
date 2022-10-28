@@ -1,12 +1,10 @@
 import fsSource           from "./FragmentShaderSource.js";
 import vsSource           from "./VertexShaderSource.js";
-import FragmentShader     from "./FragmentShader.js";
 import IndexBuffer        from "./IndexBuffer.js";
-import Program            from "./Program.js";
+import Shader             from "./Shader.js";
 import VertexArray        from "./VertexArray.js";
 import VertexBuffer       from "./VertexBuffer.js";
 import VertexBufferLayout from "./VertexBufferLayout.js";
-import VertexShader       from "./VertexShader.js";
 
 const main = () => {
   const canvas = document.querySelector( "canvas" );
@@ -21,9 +19,8 @@ const main = () => {
   gl.viewport( 0, 0, gl.canvas.width, gl.canvas.height );
 
   // *** compile shaders and create program *** //
-  const vs      = new VertexShader( gl, vsSource );
-  const fs      = new FragmentShader( gl, fsSource );
-  const program = new Program( gl, vs, fs );
+  const shader = new Shader( gl, vsSource, fsSource );
+  shader.bind();
 
   // *** buffer data *** //
   const positions = new Float32Array([
@@ -33,23 +30,23 @@ const main = () => {
     -0.5,  0.5,
   ]);
 
+  // *** index buffer data *** //
   const indices = new Uint32Array([
     0, 1, 2,
     2, 3, 0,
   ]);
 
-  // *** create and bind buffers *** //
-  const va     = new VertexArray( gl );
+  // *** create buffers *** //
+  const vao    = new VertexArray( gl );
   const layout = new VertexBufferLayout( gl );
-  const vb     = new VertexBuffer( gl, positions );
+  const vbo    = new VertexBuffer( gl, positions );
+  const ibo    = new IndexBuffer( gl, indices );
 
+  // *** fill buffers *** //
   layout.pushFloat( 2 );
-  va.addBuffer( vb, layout );
 
-  const ib = new IndexBuffer( gl, indices );
-
-  // *** uniform locations *** //
-  const colorLocation = gl.getUniformLocation( program.programId, "u_Color" );
+  vao.bind();
+  vao.addBuffer( vbo, layout );
 
   // *** render loop *** //
   let red       = 0.0;
@@ -58,17 +55,14 @@ const main = () => {
   const render = () => {
     requestAnimationFrame( render );
 
-    // *** draw scene *** //
     gl.clearColor( 0, 0, 0, 1.0 )  ;
-    gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
+    gl.clear( gl.COLOR_BUFFER_BIT );
 
-    va.bind();
-    ib.bind();
+    vao.bind();
+    ibo.bind();
 
-    gl.uniform4fv(
-      colorLocation,
-      new Float32Array([ red, 0.3, 0.8, 1.0 ])
-    );
+    shader.bind();
+    shader.setUniform4f( "u_Color", red, 0.3, 0.8, 1.0 );
 
     {
       const primitiveType = gl.TRIANGLES;
@@ -79,12 +73,8 @@ const main = () => {
       gl.drawElements( primitiveType, count, indexType, offset);
     }
     
-    if ( red > 1.0 ) {
-      increment = -0.02;
-    }
-    else if ( red < 0.0 ) {
-      increment = 0.02;
-    }
+    if      ( red > 1.0 ) increment = -0.02;
+    else if ( red < 0.0 ) increment =  0.02;
 
     red += increment;
   };

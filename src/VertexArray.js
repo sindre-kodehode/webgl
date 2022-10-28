@@ -8,10 +8,6 @@ export default class {
     this.gl.bindVertexArray( this.renderId );
   }
 
-  unbind() {
-    this.gl.bindVertexArray( 0 );
-  }
-  
   delete() {
     this.gl.deleteVertexArray( this.renderId );
   }

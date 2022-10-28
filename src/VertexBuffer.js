@@ -12,10 +12,6 @@ export default class {
     this.gl.bindBuffer( this.gl.ARRAY_BUFFER, this.renderId );
   }
 
-  unbind() {
-    this.gl.bindBuffer( this.gl.ARRAY_BUFFER, 0 );
-  }
-
   delete() {
     this.gl.deleteBuffer( this.renderId );
   }

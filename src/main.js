@@ -1,7 +1,9 @@
 import fsSource           from "./FragmentShaderSource.js";
 import vsSource           from "./VertexShaderSource.js";
 import IndexBuffer        from "./IndexBuffer.js";
+import Renderer           from "./Renderer.js";
 import Shader             from "./Shader.js";
+import Texture            from "./Texture.js";
 import VertexArray        from "./VertexArray.js";
 import VertexBuffer       from "./VertexBuffer.js";
 import VertexBufferLayout from "./VertexBufferLayout.js";
@@ -17,10 +19,7 @@ const main = () => {
 
   // *** initialize viewport *** //
   gl.viewport( 0, 0, gl.canvas.width, gl.canvas.height );
-
-  // *** compile shaders and create program *** //
-  const shader = new Shader( gl, vsSource, fsSource );
-  shader.bind();
+  gl.clearColor( 0, 0, 0, 1.0 );
 
   // *** buffer data *** //
   const positions = new Float32Array([
@@ -48,31 +47,29 @@ const main = () => {
   vao.bind();
   vao.addBuffer( vbo, layout );
 
+  // *** compile shaders and create program *** //
+  const shader = new Shader( gl, vsSource, fsSource );
+
+  // *** create texture *** //
+  const texture = new Texture( gl, "../res/leaves.jpg" );
+  texture.bind();
+
   // *** render loop *** //
-  let red       = 0.0;
-  let increment = 0.02;
+  const renderer = new Renderer( gl );
+
+  let red        = 0.0;
+  let increment  = 0.02;
 
   const render = () => {
     requestAnimationFrame( render );
 
-    gl.clearColor( 0, 0, 0, 1.0 )  ;
-    gl.clear( gl.COLOR_BUFFER_BIT );
-
-    vao.bind();
-    ibo.bind();
+    renderer.clear();
 
     shader.bind();
     shader.setUniform4f( "u_Color", red, 0.3, 0.8, 1.0 );
 
-    {
-      const primitiveType = gl.TRIANGLES;
-      const offset        = 0;
-      const count         = 6;
-      const indexType     = gl.UNSIGNED_INT;
+    renderer.draw( vao, ibo, shader );
 
-      gl.drawElements( primitiveType, count, indexType, offset);
-    }
-    
     if      ( red > 1.0 ) increment = -0.02;
     else if ( red < 0.0 ) increment =  0.02;
 

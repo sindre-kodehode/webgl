@@ -1,14 +1,13 @@
 export default class {
-  constructor( gl ) {
-    this.gl = gl;
+  constructor() {
     this.elements = [];
     this.stride   = 0;
   }
 
-  pushFloat( count ) {
+  pushFloat( gl, count ) {
     this.elements.push({ 
       count      : count,
-      type       : this.gl.FLOAT,
+      type       : gl.FLOAT,
       normalized : false,
       size       : 4
     })
@@ -16,10 +15,10 @@ export default class {
     this.stride += 4 * count;
   }
 
-  pushUint( count ) {
+  pushUint( gl, count ) {
     this.elements.push({ 
       count      : count,
-      type       : this.gl.UNSIGNED_INT,
+      type       : gl.UNSIGNED_INT,
       normalized : false,
       size       : 4
     })

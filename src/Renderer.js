@@ -1,20 +1,18 @@
 export default class {
-  constructor( gl ) {
-    this.gl = gl;
+  constructor() { }
+
+  clear( gl ) {
+    gl.clear( gl.COLOR_BUFFER_BIT );
   }
 
-  clear() {
-    this.gl.clear( this.gl.COLOR_BUFFER_BIT );
-  }
+  draw( gl, vao, ibo, shader ) {
+    vao.bind( gl );
+    ibo.bind( gl );
 
-  draw( vao, ibo, shader ) {
-    vao.bind();
-    ibo.bind();
-
-    const mode   = this.gl.TRIANGLES;
-    const type   = this.gl.UNSIGNED_INT;
+    const mode   = gl.TRIANGLES;
+    const type   = gl.UNSIGNED_INT;
     const offset = 0;
 
-    this.gl.drawElements( mode, ibo.count, type, offset);
+    gl.drawElements( mode, ibo.count, type, offset);
   }
 }

@@ -1,40 +1,39 @@
 export default class {
   constructor( gl, vsSource, fsSource ) {
-    this.gl       = gl;
     this.vsSource = vsSource;
     this.fsSource = fsSource;
 
-    this.renderId = this.createShader();
+    this.renderId = this.createShader( gl );
     this.uniformLocations = new Map();
   }
 
-  delete() {
-    this.gl.deleteProgram( this.renderId );
+  delete( gl ) {
+    gl.deleteProgram( this.renderId );
   }
 
-  bind() {
-    this.gl.useProgram( this.renderId );
+  bind( gl ) {
+    gl.useProgram( this.renderId );
   }
 
-  setUniform4f( name, v0, v1, v2, v3 ) {
-    this.gl.uniform4fv(
+  setUniform4f( gl, name, v0, v1, v2, v3 ) {
+    gl.uniform4fv(
       this.getUniformLocation( name ),
       new Float32Array([ v0, v1, v2, v3 ])
     );
   }
 
-  setUniform1i( name, value ) {
-    this.gl.uniform1i(
-      this.getUniformLocation( name ),
+  setUniform1i( gl, name, value ) {
+    gl.uniform1i(
+      this.getUniformLocation( gl, name ),
       value
     );
   }
 
-  getUniformLocation( name ) {
+  getUniformLocation( gl, name ) {
     if ( this.uniformLocations.has( name ) )
       return this.uniformLocations.get( name );
 
-    const location = this.gl.getUniformLocation( this.renderId, name );
+    const location = gl.getUniformLocation( this.renderId, name );
 
     if ( !location )
       console.warn( "[WARN] Uniform :", name, "not found"  );
@@ -43,50 +42,44 @@ export default class {
     return location;
   }
 
-  createShader() {
-    const program = this.gl.createProgram();
+  createShader( gl ) {
+    const program = gl.createProgram();
 
-    const vs = this.compileShader( this.vsSource, this.gl.VERTEX_SHADER   );
-    const fs = this.compileShader( this.fsSource, this.gl.FRAGMENT_SHADER );
+    const vs = this.compileShader( gl, this.vsSource, gl.VERTEX_SHADER   );
+    const fs = this.compileShader( gl, this.fsSource, gl.FRAGMENT_SHADER );
 
-    this.gl.attachShader( program, vs );
-    this.gl.attachShader( program, fs );
+    gl.attachShader( program, vs );
+    gl.attachShader( program, fs );
 
-    this.gl.linkProgram( program );
-    this.gl.validateProgram( program )
+    gl.linkProgram( program );
+    gl.validateProgram( program )
 
-    this.gl.deleteShader( vs );
-    this.gl.deleteShader( fs );
+    gl.deleteShader( vs );
+    gl.deleteShader( fs );
 
-    const success = this.gl.getProgramParameter(
-      program,
-      this.gl.LINK_STATUS
-    );
+    const success = gl.getProgramParameter( program, gl.LINK_STATUS );
 
     if ( success ) return program;
 
-    const error = this.gl.getProgramInfoLog( program );
+    const error = gl.getProgramInfoLog( program );
     console.error( error );
 
     this.delete();
   }
 
-  compileShader( source, type ) {
-    const shader = this.gl.createShader( type );
+  compileShader( gl, source, type ) {
+    const shader = gl.createShader( type );
 
-    this.gl.shaderSource( shader, source );
-    this.gl.compileShader( shader );
+    gl.shaderSource( shader, source );
+    gl.compileShader( shader );
 
-    const success = this.gl.getShaderParameter(
-      shader,
-      this.gl.COMPILE_STATUS
-    );
+    const success = gl.getShaderParameter( shader, gl.COMPILE_STATUS );
 
     if ( success ) return shader;
 
-    const error = this.gl.getShaderInfoLog( shader );
+    const error = gl.getShaderInfoLog( shader );
     console.error( error );
 
-    this.gl.deleteShader( shader );
+    gl.deleteShader( shader );
   }
 }

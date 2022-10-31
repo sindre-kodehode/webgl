@@ -1,26 +1,25 @@
 export default class {
   constructor( gl ) {
-    this.gl       = gl;
-    this.renderId = this.gl.createVertexArray();
+    this.renderId = gl.createVertexArray();
   }
 
-  bind() {
-    this.gl.bindVertexArray( this.renderId );
+  bind( gl ) {
+    gl.bindVertexArray( this.renderId );
   }
 
-  delete() {
-    this.gl.deleteVertexArray( this.renderId );
+  delete( gl ) {
+    gl.deleteVertexArray( this.renderId );
   }
 
-  addBuffer( vb, layout ) {
-    this.bind();
-    vb.bind();
+  addBuffer( gl, vb, layout ) {
+    this.bind( gl );
+    vb.bind( gl );
 
     let offset = 0;
 
     layout.elements.forEach( ( element, i ) => {
-      this.gl.enableVertexAttribArray( i );
-      this.gl.vertexAttribPointer(
+      gl.enableVertexAttribArray( i );
+      gl.vertexAttribPointer(
         i,
         element.count,
         element.type,

@@ -42,20 +42,20 @@ const main = () => {
   const ibo    = new IndexBuffer( gl, indices );
 
   // *** fill buffers *** //
-  layout.pushFloat( 2 );
-  layout.pushFloat( 2 );
+  layout.pushFloat( gl, 2 );
+  layout.pushFloat( gl, 2 );
 
-  vao.bind();
-  vao.addBuffer( vbo, layout );
+  vao.bind( gl );
+  vao.addBuffer( gl, vbo, layout );
 
   // *** compile shaders and create program *** //
   const shader = new Shader( gl, vsSource, fsSource );
-  shader.bind();
+  shader.bind( gl );
 
   // *** create texture *** //
   const texture = new Texture( gl, "../res/leaves.jpg" );
   texture.bind( gl );
-  shader.setUniform1i( "u_Texture", 0 );
+  shader.setUniform1i( gl, "u_Texture", 0 );
 
   // *** render loop *** //
   const renderer = new Renderer( gl );
@@ -66,13 +66,13 @@ const main = () => {
   const render = () => {
     requestAnimationFrame( render );
 
-    renderer.clear();
+    renderer.clear( gl );
 
-    vao.bind();
-    ibo.bind();
-    shader.bind();
+    vao.bind( gl );
+    ibo.bind( gl );
+    shader.bind( gl );
 
-    renderer.draw( vao, ibo, shader );
+    renderer.draw( gl, vao, ibo, shader );
 
     if      ( red > 1.0 ) increment = -0.02;
     else if ( red < 0.0 ) increment =  0.02;

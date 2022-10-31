@@ -23,6 +23,13 @@ export default class {
     );
   }
 
+  setUniform1i( name, value ) {
+    this.gl.uniform1i(
+      this.getUniformLocation( name ),
+      value
+    );
+  }
+
   getUniformLocation( name ) {
     if ( this.uniformLocations.has( name ) )
       return this.uniformLocations.get( name );

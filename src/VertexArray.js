@@ -25,7 +25,7 @@ export default class {
         element.count,
         element.type,
         element.normalized,
-        layout.elements.stride,
+        layout.stride,
         offset
       );
 

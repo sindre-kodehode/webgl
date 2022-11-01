@@ -1,5 +1,9 @@
+import                         "./css/style.css";
+import leaves             from "./res/leaves.jpg";
+
 import fsSource           from "./FragmentShaderSource.js";
 import vsSource           from "./VertexShaderSource.js";
+
 import IndexBuffer        from "./IndexBuffer.js";
 import Renderer           from "./Renderer.js";
 import Shader             from "./Shader.js";
@@ -53,7 +57,7 @@ const main = () => {
   shader.bind( gl );
 
   // *** create texture *** //
-  const texture = new Texture( gl, "../res/leaves.jpg" );
+  const texture = new Texture( gl, leaves );
   texture.bind( gl );
   shader.setUniform1i( gl, "u_Texture", 0 );
 

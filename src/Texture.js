@@ -10,7 +10,7 @@ export default class {
     this.border         = 0;
     this.format         = gl.RGBA;
     this.type           = gl.UNSIGNED_BYTE;
-    this.source         = new Uint8Array([ 0, 0, 255, 255 ]);
+    this.source         = new Uint8Array([ 0, 0, 0, 255 ]);
 
     this.renderId = gl.createTexture();
 
@@ -27,6 +27,9 @@ export default class {
       this.type,
       this.source
     );
+
+    gl.enable( gl.BLEND );
+    gl.blendFunc( gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA );
 
     this.image = new Image( this.path );
 

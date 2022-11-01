@@ -1,19 +1,19 @@
 import                         "./css/style.css";
 import leaves             from "./res/leaves.jpg";
 
-import fsSource           from "./FragmentShaderSource.js";
-import vsSource           from "./VertexShaderSource.js";
+import fsSource           from "./FragmentShaderSource";
+import vsSource           from "./VertexShaderSource";
 
-import IndexBuffer        from "./IndexBuffer.js";
-import Renderer           from "./Renderer.js";
-import Shader             from "./Shader.js";
-import Texture            from "./Texture.js";
-import VertexArray        from "./VertexArray.js";
-import VertexBuffer       from "./VertexBuffer.js";
-import VertexBufferLayout from "./VertexBufferLayout.js";
+import IndexBuffer        from "./IndexBuffer";
+import Renderer           from "./Renderer";
+import Shader             from "./Shader";
+import Texture            from "./Texture";
+import VertexArray        from "./VertexArray";
+import VertexBuffer       from "./VertexBuffer";
+import VertexBufferLayout from "./VertexBufferLayout";
 
 const main = () => {
-  const canvas = document.querySelector( "canvas" );
+  const canvas = document.querySelector( "canvas" ) as HTMLCanvasElement;
   const gl     = canvas.getContext( "webgl2" );
 
   if ( !gl ) {
@@ -46,42 +46,34 @@ const main = () => {
   const ibo    = new IndexBuffer( gl, indices );
 
   // *** fill buffers *** //
-  layout.pushFloat( gl, 2 );
-  layout.pushFloat( gl, 2 );
+  layout.pushFloat( 2 );
+  layout.pushFloat( 2 );
 
-  vao.bind( gl );
-  vao.addBuffer( gl, vbo, layout );
+  vao.bind();
+  vao.addBuffer( vbo, layout );
 
   // *** compile shaders and create program *** //
   const shader = new Shader( gl, vsSource, fsSource );
-  shader.bind( gl );
+  shader.bind();
 
   // *** create texture *** //
   const texture = new Texture( gl, leaves );
-  texture.bind( gl );
-  shader.setUniform1i( gl, "u_Texture", 0 );
+  texture.bind();
+  shader.setUniform1i( "u_Texture", 0 );
 
   // *** render loop *** //
   const renderer = new Renderer( gl );
 
-  let red        = 0.0;
-  let increment  = 0.02;
-
   const render = () => {
     requestAnimationFrame( render );
 
-    renderer.clear( gl );
+    renderer.clear();
 
-    vao.bind( gl );
-    ibo.bind( gl );
-    shader.bind( gl );
+    vao.bind();
+    ibo.bind();
+    shader.bind();
 
-    renderer.draw( gl, vao, ibo, shader );
-
-    if      ( red > 1.0 ) increment = -0.02;
-    else if ( red < 0.0 ) increment =  0.02;
-
-    red += increment;
+    renderer.draw( vao, ibo );
   };
 
   requestAnimationFrame( render );

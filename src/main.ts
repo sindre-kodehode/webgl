@@ -12,7 +12,7 @@ import VertexArray        from "./VertexArray";
 import VertexBuffer       from "./VertexBuffer";
 import VertexBufferLayout from "./VertexBufferLayout";
 
-import { mat4, vec3 }           from "gl-matrix";
+import { mat4, vec3 }     from "gl-matrix";
 
 const main = () => {
   const canvas = document.querySelector( "canvas" ) as HTMLCanvasElement;
@@ -23,16 +23,12 @@ const main = () => {
     return;
   }
 
-  // *** initialize viewport *** //
-  gl.viewport( 0, 0, gl.canvas.width, gl.canvas.height );
-  gl.clearColor( 0, 0, 0, 1.0 );
-
   // *** buffer data *** //
   const positions = new Float32Array([
-       0.0,   0.0, 0.0, 0.0,
-     240.0,   0.0, 1.0, 0.0,
-     240.0, 180.0, 1.0, 1.0,
-       0.0, 180.0, 0.0, 1.0,
+       0.0,   0.0,  0.0, 0.0,
+     240.0,   0.0,  1.0, 0.0,
+     240.0, 180.0,  1.0, 1.0,
+       0.0, 180.0,  0.0, 1.0,
   ]);
 
   // *** index buffer data *** //
@@ -95,11 +91,28 @@ const main = () => {
   const render = () => {
     requestAnimationFrame( render );
 
+    // *** resize canvas and viewport *** //
+    if ( gl.canvas.width  !== gl.canvas.clientWidth  ||
+         gl.canvas.height !== gl.canvas.clientHeight   ) {
+      gl.canvas.width  = gl.canvas.clientWidth;
+      gl.canvas.height = gl.canvas.clientHeight;
+    }
+    mat4.ortho(
+      projection,
+       0.0, gl.canvas.width,
+       0.0, gl.canvas.height,
+      -1.0, 1.0
+    );
+    gl.viewport( 0, 0, gl.canvas.width, gl.canvas.height );
+    gl.clearColor( 0, 0, 0, 1.0 );
+
     renderer.clear();
 
     vao.bind();
     ibo.bind();
     shader.bind();
+
+    shader.setUniformMat4f( "u_Projection", projection );
 
     renderer.draw( vao, ibo );
   };

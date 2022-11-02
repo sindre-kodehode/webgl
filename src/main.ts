@@ -64,7 +64,7 @@ const main = () => {
   shader.setUniformMat4f( "u_Projection", projection );
 
   // *** create view matrix *** //
-  const view = mat4.create();
+  let view = mat4.create();
   mat4.translate(
     view,
     view,
@@ -73,7 +73,7 @@ const main = () => {
   shader.setUniformMat4f( "u_View", view );
 
   // *** create model matrix *** //
-  const model = mat4.create();
+  let model = mat4.create();
   mat4.translate(
     model,
     model,
@@ -97,12 +97,6 @@ const main = () => {
       gl.canvas.width  = gl.canvas.clientWidth;
       gl.canvas.height = gl.canvas.clientHeight;
     }
-    mat4.ortho(
-      projection,
-       0.0, gl.canvas.width,
-       0.0, gl.canvas.height,
-      -1.0, 1.0
-    );
     gl.viewport( 0, 0, gl.canvas.width, gl.canvas.height );
     gl.clearColor( 0, 0, 0, 1.0 );
 
@@ -111,7 +105,25 @@ const main = () => {
     vao.bind();
     ibo.bind();
     shader.bind();
+    
+    // *** update uniforms *** //
+    mat4.ortho(
+      projection,
+       0.0, gl.canvas.width,
+       0.0, gl.canvas.height,
+      -1.0, 1.0
+    );
+    mat4.translate(
+      model,
+      mat4.create(),
+      vec3.fromValues(
+        ( gl.canvas.width  / 2 ) - 120,
+        ( gl.canvas.height / 2 ) -  90,
+        0.0
+      )
+    );
 
+    shader.setUniformMat4f( "u_Model", model );
     shader.setUniformMat4f( "u_Projection", projection );
 
     renderer.draw( vao, ibo );

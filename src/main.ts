@@ -13,6 +13,9 @@ import VertexBuffer       from "./VertexBuffer";
 import VertexBufferLayout from "./VertexBufferLayout";
 
 import { mat4, vec3 }     from "gl-matrix";
+import DebugScreen from "./DebugScreen";
+
+const debugScreen = new DebugScreen();
 
 const main = () => {
   const canvas = document.querySelector( "canvas" ) as HTMLCanvasElement;
@@ -86,8 +89,30 @@ const main = () => {
   texture.bind();
   shader.setUniform1i( "u_Texture", 0 );
 
-  // *** render loop *** //
+  let translation = vec3.fromValues( 0.0, 0.0, 0.0 );
+
+  // *** add debug items *** //
+  debugScreen.addSlider(
+    "x",
+    () => translation[0],
+    0.0,
+    () => gl.canvas.width,
+    1.0,
+    value => translation[0]= value
+  );
+  debugScreen.addSlider(
+    "y",
+    () => translation[1],
+    0.0,
+    () => gl.canvas.height,
+    1.0,
+    value => translation[1]= value
+  );
+
   const renderer = new Renderer( gl );
+  gl.clearColor( 0, 0, 0, 1.0 );
+
+  // *** render loop *** //
   const render = () => {
     requestAnimationFrame( render );
 
@@ -96,33 +121,28 @@ const main = () => {
          gl.canvas.height !== gl.canvas.clientHeight   ) {
       gl.canvas.width  = gl.canvas.clientWidth;
       gl.canvas.height = gl.canvas.clientHeight;
+      gl.viewport( 0, 0, gl.canvas.width, gl.canvas.height );
+
+      mat4.ortho(
+        projection,
+         0.0, gl.canvas.width,
+         0.0, gl.canvas.height,
+        -1.0, 1.0
+      );
     }
-    gl.viewport( 0, 0, gl.canvas.width, gl.canvas.height );
-    gl.clearColor( 0, 0, 0, 1.0 );
 
     renderer.clear();
 
     vao.bind();
     ibo.bind();
-    shader.bind();
-    
-    // *** update uniforms *** //
-    mat4.ortho(
-      projection,
-       0.0, gl.canvas.width,
-       0.0, gl.canvas.height,
-      -1.0, 1.0
-    );
+
     mat4.translate(
       model,
       mat4.create(),
-      vec3.fromValues(
-        ( gl.canvas.width  / 2 ) - 120,
-        ( gl.canvas.height / 2 ) -  90,
-        0.0
-      )
+      translation
     );
 
+    shader.bind();
     shader.setUniformMat4f( "u_Model", model );
     shader.setUniformMat4f( "u_Projection", projection );
 

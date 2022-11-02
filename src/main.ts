@@ -12,6 +12,8 @@ import VertexArray        from "./VertexArray";
 import VertexBuffer       from "./VertexBuffer";
 import VertexBufferLayout from "./VertexBufferLayout";
 
+import { mat4, vec3 }           from "gl-matrix";
+
 const main = () => {
   const canvas = document.querySelector( "canvas" ) as HTMLCanvasElement;
   const gl     = canvas.getContext( "webgl2" );
@@ -27,10 +29,10 @@ const main = () => {
 
   // *** buffer data *** //
   const positions = new Float32Array([
-    -0.5, -0.5, 0.0, 0.0,
-     0.5, -0.5, 1.0, 0.0,
-     0.5,  0.5, 1.0, 1.0,
-    -0.5,  0.5, 0.0, 1.0,
+       0.0,   0.0, 0.0, 0.0,
+     240.0,   0.0, 1.0, 0.0,
+     240.0, 180.0, 1.0, 1.0,
+       0.0, 180.0, 0.0, 1.0,
   ]);
 
   // *** index buffer data *** //
@@ -39,22 +41,49 @@ const main = () => {
     2, 3, 0,
   ]);
 
-  // *** create buffers *** //
-  const vao    = new VertexArray( gl );
+  // *** set buffer layout *** //
   const layout = new VertexBufferLayout( gl );
-  const vbo    = new VertexBuffer( gl, positions );
-  const ibo    = new IndexBuffer( gl, indices );
-
-  // *** fill buffers *** //
   layout.pushFloat( 2 );
   layout.pushFloat( 2 );
 
+  // *** create buffers *** //
+  const vao = new VertexArray( gl );
+  const vbo = new VertexBuffer( gl, positions );
+  const ibo = new IndexBuffer( gl, indices );
   vao.bind();
   vao.addBuffer( vbo, layout );
 
   // *** compile shaders and create program *** //
   const shader = new Shader( gl, vsSource, fsSource );
   shader.bind();
+
+  // *** create projection matrix *** //
+  const projection = mat4.create();
+  mat4.ortho(
+    projection,
+     0.0, gl.canvas.width,
+     0.0, gl.canvas.height,
+    -1.0, 1.0
+  );
+  shader.setUniformMat4f( "u_Projection", projection );
+
+  // *** create view matrix *** //
+  const view = mat4.create();
+  mat4.translate(
+    view,
+    view,
+    vec3.fromValues( 0.0, 0.0, 0.0 )
+  );
+  shader.setUniformMat4f( "u_View", view );
+
+  // *** create model matrix *** //
+  const model = mat4.create();
+  mat4.translate(
+    model,
+    model,
+    vec3.fromValues( 0.0, 0.0, 0.0 )
+  );
+  shader.setUniformMat4f( "u_Model", model );
 
   // *** create texture *** //
   const texture = new Texture( gl, leaves );
@@ -63,7 +92,6 @@ const main = () => {
 
   // *** render loop *** //
   const renderer = new Renderer( gl );
-
   const render = () => {
     requestAnimationFrame( render );
 

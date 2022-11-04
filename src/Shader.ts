@@ -40,6 +40,17 @@ export default class {
     );
   }
 
+  setUniform2f( 
+    name : string,
+    v0   : number,
+    v1   : number,
+  ) {
+    this.gl.uniform2fv(
+      this.getUniformLocation( name ),
+      new Float32Array([ v0, v1 ])
+    );
+  }
+
   setUniform1i( 
     name  : string,
     value : number

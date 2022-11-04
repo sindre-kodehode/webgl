@@ -1,28 +1,39 @@
-import IndexBuffer from "./IndexBuffer";
-import VertexArray from "./VertexArray";
+// *** default imports *** //
+import Rectangle from "./Rectangle";
 
 export default class {
-  gl : WebGL2RenderingContext;
+  gl         : WebGL2RenderingContext;
+  geometries : Rectangle[] = new Array< Rectangle >();
 
   constructor( gl : WebGL2RenderingContext ) {
     this.gl = gl;
   }
 
-  clear() {
-    this.gl.clear( this.gl.COLOR_BUFFER_BIT );
+  addGeometry( rectangle : Rectangle ) {
+    this.geometries.push( rectangle );
   }
 
-  draw( 
-    vao : VertexArray,
-    ibo : IndexBuffer
-  ) {
-    vao.bind();
-    ibo.bind();
+  update( dt : number ) {
+    this.geometries.forEach( rectangle => {
+      rectangle.update( dt );
+    });
+  }
 
-    const mode   : number = this.gl.TRIANGLES;
-    const type   : number = this.gl.UNSIGNED_INT;
-    const offset : number = 0;
+  draw() {
+    // *** resize canvas and viewport *** //
+    if ( this.gl.canvas.width  !== this.gl.canvas.clientWidth
+      || this.gl.canvas.height !== this.gl.canvas.clientHeight ) {
 
-    this.gl.drawElements( mode, ibo.count, type, offset);
+      this.gl.canvas.width  = this.gl.canvas.clientWidth;
+      this.gl.canvas.height = this.gl.canvas.clientHeight;
+      this.gl.viewport( 0, 0, this.gl.canvas.width, this.gl.canvas.height );
+    }
+
+    this.gl.clearColor( 0.0, 0.0, 0.0, 1.0 );
+    this.gl.clear( this.gl.COLOR_BUFFER_BIT );
+
+    this.geometries.forEach( rectangle => {
+      rectangle.draw();
+    });
   }
 }

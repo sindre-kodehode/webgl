@@ -2,8 +2,9 @@
 import "./css/style.css";
 
 // *** default imports  *** //
-import Rectangle from "./Rectangle";
-import Renderer  from "./Renderer";
+import DebugScreen from "./DebugScreen";
+import Rectangle   from "./Rectangle";
+import Renderer    from "./Renderer";
 
 const main = () => {
   const canvas = document.querySelector( "canvas" ) as HTMLCanvasElement;
@@ -18,6 +19,20 @@ const main = () => {
 
   const rect  = new Rectangle( gl, 100, 100 );
   const scene = new Renderer( gl );
+  const ui    = new DebugScreen();
+
+  ui.addSlider(
+    "x",
+    () => rect.x,
+    () => gl.canvas.width,
+    value => rect.x = value
+  );
+  ui.addSlider(
+    "y",
+    () => rect.y,
+    () => gl.canvas.height,
+    value => rect.y = value
+  );
 
   scene.addGeometry( rect );
 
@@ -32,6 +47,8 @@ const main = () => {
     then = now;
 
     scene.update( dt );
+    ui.update();
+
     scene.draw();
   };
 

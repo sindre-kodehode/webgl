@@ -1,6 +1,7 @@
 export default class {
   debugContainer : HTMLElement;
   showDebug      : boolean = false;
+  updateFuncs    : Array< () => void > = [];
 
   constructor() {
     this.debugContainer = document.createElement( "section" ) as HTMLElement;
@@ -26,31 +27,43 @@ export default class {
   addSlider(
     name     : string,
     value    : () => number,
-    min      : number,
     max      : () => number,
-    step     : number,
     setValue : ( value : number ) => void
   ) {
+    const sliderContainer = document.createElement( "div" ) as HTMLDivElement;
+
     const slider = document.createElement( "input" ) as HTMLInputElement;
     slider.type       = "range";
-    slider.min        = `${ min     }`;
+    slider.min        = "0";
+    slider.step       = "1";
     slider.max        = `${ max()   }`;
-    slider.step       = `${ step    }`;
     slider.value      = `${ value() }`;
 
     const label  = document.createElement( "label" ) as HTMLLabelElement;
-    label.textContent = `${ name }: ${ value() }`;
-    label.style.display = "block";
+    label.textContent = `${ name }`;
 
-    this.debugContainer.appendChild( label  );
-    this.debugContainer.appendChild( slider );
+    const output = document.createElement( "output" ) as HTMLOutputElement;
 
-    slider.addEventListener( "input", () => {
+    sliderContainer.appendChild( label  );
+    sliderContainer.appendChild( slider );
+    sliderContainer.appendChild( output );
+
+    this.debugContainer.appendChild( sliderContainer );
+
+    const update = () => {
       setValue( slider.valueAsNumber );
-      slider.max        = `${ max()   }`;
-      slider.value      = `${ value() }`;
-      label.textContent = `${ name }: ${ value() }`;
-    });
+      slider.max         = `${ max()   }`;
+      slider.value       = `${ value() }`;
+      output.textContent = `${ value() }`;
+    }
+
+    slider.addEventListener( "input",  () => update() );
+    slider.addEventListener( "change", () => update() );
+    this.updateFuncs.push( update );
+  }
+
+  update() {
+    this.updateFuncs.forEach( update => update() );
   }
 
   toggle() {

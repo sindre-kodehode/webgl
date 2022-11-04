@@ -95,8 +95,7 @@ export default class {
   }
 
   update( dt : number ) {
-    this.x += ( dt * 0.1 );
-    if ( this.x > this.gl.canvas.width ) this.x = 0.0 - this.width;
+    // do some updatin'
   }
 
   draw() {

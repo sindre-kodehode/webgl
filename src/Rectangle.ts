@@ -13,11 +13,17 @@ const vsSource =
 
 uniform vec2 u_Resolution;
 uniform vec2 u_Translation;
+uniform vec2 u_Rotation;
 
 in vec2 a_Position;
 
 void main() {
-  vec2 position  = a_Position + u_Translation;
+  vec2 rotation = vec2(
+    a_Position.x * u_Rotation.y + a_Position.y * u_Rotation.x,
+    a_Position.y * u_Rotation.y - a_Position.x * u_Rotation.x
+  );
+
+  vec2 position  = rotation + u_Translation;
   vec2 zeroToOne = position / u_Resolution;
   vec2 zeroToTwo = zeroToOne * 2.0;
   vec2 clipSpace = zeroToTwo - 1.0;
@@ -47,20 +53,19 @@ export default class {
   program     : Shader;
   vao         : VertexArray;
   vbo         : VertexBuffer;
-  x           : number;
-  y           : number;
 
   color       : [ number, number, number, number ] = [
     Math.random(), Math.random(), Math.random(), 1
   ];
   height      : number = 100;
+  rotation    : number = 90.0;
   translation : vec2   = vec2.fromValues( 0, 0 );
   width       : number = 100;
+  x           : number = 0.0;
+  y           : number = 0.0;
 
-  constructor( gl : WebGL2RenderingContext, x : number, y : number ) {
+  constructor( gl : WebGL2RenderingContext ) {
     this.gl = gl;
-    this.x  = x;
-    this.y  = y;
 
     // *** buffer data *** //
     this.positions = new Float32Array([
@@ -92,6 +97,11 @@ export default class {
     this.program.bind();
     this.program.setUniform4f( "u_Color", ...this.color );
     this.program.setUniform2f( "u_Translation", this.x, this.y );
+    this.program.setUniform2f( 
+      "u_Rotation",
+      Math.cos( this.rotation * Math.PI / 180 ),
+      Math.sin( this.rotation * Math.PI / 180 )
+    );
   }
 
   update( dt : number ) {
@@ -108,6 +118,11 @@ export default class {
     );
     this.program.setUniform2f(
       "u_Translation", this.x, this.y
+    );
+    this.program.setUniform2f( 
+      "u_Rotation",
+      Math.cos( this.rotation * Math.PI / 180 ),
+      Math.sin( this.rotation * Math.PI / 180 )
     );
 
     this.gl.drawElements( 

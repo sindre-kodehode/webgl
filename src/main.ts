@@ -17,7 +17,7 @@ const main = () => {
 
   gl.viewport( 0, 0, gl.canvas.width, gl.canvas.height );
 
-  const rect  = new Rectangle( gl, 100, 100 );
+  const rect  = new Rectangle( gl );
   const scene = new Renderer( gl );
   const ui    = new DebugScreen();
 
@@ -32,6 +32,12 @@ const main = () => {
     () => rect.y,
     () => gl.canvas.height,
     value => rect.y = value
+  );
+  ui.addSlider(
+    "rotation",
+    () => rect.rotation,
+    () => 360,
+    value => rect.rotation = value
   );
 
   scene.addGeometry( rect );

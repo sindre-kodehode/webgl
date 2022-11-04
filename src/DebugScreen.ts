@@ -9,7 +9,9 @@ export default class {
     this.debugContainer.style.background = "rgba(255, 76, 255, 0.1)";
     this.debugContainer.style.color      = "white";
     this.debugContainer.style.visibility = "hidden";
-    this.debugContainer.style.width      = "33%";
+    this.debugContainer.style.display    = "inline-block";
+    this.debugContainer.style.overflow   = "auto";
+    this.debugContainer.style.resize     = "both";
 
     const title = document.createElement( "h1" ) as HTMLHeadingElement;
     title.textContent = "debug";

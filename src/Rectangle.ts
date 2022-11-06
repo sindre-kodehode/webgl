@@ -6,24 +6,19 @@ import VertexBuffer       from "./VertexBuffer";
 import VertexBufferLayout from "./VertexBufferLayout";
 
 // *** named imports *** //
-import { vec2 }           from "gl-matrix";
+import { mat3, vec2 }     from "gl-matrix";
 
 const vsSource =
 `#version 300 es
 
 uniform vec2 u_Resolution;
-uniform vec2 u_Translation;
-uniform vec2 u_Rotation;
+uniform mat3 u_Matrix;
 
 in vec2 a_Position;
 
 void main() {
-  vec2 rotation = vec2(
-    a_Position.x * u_Rotation.y + a_Position.y * u_Rotation.x,
-    a_Position.y * u_Rotation.y - a_Position.x * u_Rotation.x
-  );
+  vec2 position  = ( u_Matrix * vec3( a_Position, 1 ) ).xy;
 
-  vec2 position  = rotation + u_Translation;
   vec2 zeroToOne = position / u_Resolution;
   vec2 zeroToTwo = zeroToOne * 2.0;
   vec2 clipSpace = zeroToTwo - 1.0;
@@ -50,29 +45,25 @@ export default class {
   indices     : Uint32Array;
   layout      : VertexBufferLayout;
   positions   : Float32Array;
+  position    : vec2;
   program     : Shader;
+  rotation    : number;
+  scale       : vec2;
   vao         : VertexArray;
   vbo         : VertexBuffer;
 
-  color       : [ number, number, number, number ] = [
-    Math.random(), Math.random(), Math.random(), 1
-  ];
-  height      : number = 100;
-  rotation    : number = 90.0;
-  translation : vec2   = vec2.fromValues( 0, 0 );
-  width       : number = 100;
-  x           : number = 0.0;
-  y           : number = 0.0;
-
   constructor( gl : WebGL2RenderingContext ) {
-    this.gl = gl;
+    this.gl       = gl;
+    this.position = vec2.fromValues( 0, 0 );
+    this.rotation = 0.0;
+    this.scale    = vec2.fromValues( 100, 100 );
 
     // *** buffer data *** //
     this.positions = new Float32Array([
-             0.0,         0.0,
-      this.width,         0.0,
-      this.width, this.height,
-             0.0, this.height
+      0.0, 0.0,
+      1.0, 0.0,
+      1.0, 1.0,
+      0.0, 1.0
     ]);
 
     // *** index buffer data *** //
@@ -95,18 +86,23 @@ export default class {
     // *** compile shaders and create program *** //
     this.program = new Shader( this.gl, vsSource, fsSource );
     this.program.bind();
-    this.program.setUniform4f( "u_Color", ...this.color );
-    this.program.setUniform2f( "u_Translation", this.x, this.y );
-    this.program.setUniform2f( 
-      "u_Rotation",
-      Math.cos( this.rotation * Math.PI / 180 ),
-      Math.sin( this.rotation * Math.PI / 180 )
+    this.program.setUniform4f(
+      "u_Color",
+      Math.random(),
+      Math.random(),
+      Math.random(),
+      1
     );
+
+    const translation = mat3.create();
+    mat3.translate( translation, translation, this.position );
+    mat3.rotate( translation, translation, this.rotation * Math.PI / 180 );
+    mat3.scale( translation, translation, this.scale );
+
+    this.program.setUniformMat3f( "u_Matrix", translation );
   }
 
-  update( dt : number ) {
-    // do some updatin'
-  }
+  update( dt : number ) { return dt }
 
   draw() {
     this.vao.bind();
@@ -116,14 +112,13 @@ export default class {
     this.program.setUniform2f(
       "u_Resolution", this.gl.canvas.width, this.gl.canvas.height
     );
-    this.program.setUniform2f(
-      "u_Translation", this.x, this.y
-    );
-    this.program.setUniform2f( 
-      "u_Rotation",
-      Math.cos( this.rotation * Math.PI / 180 ),
-      Math.sin( this.rotation * Math.PI / 180 )
-    );
+
+    const translation = mat3.create();
+    mat3.translate( translation, translation, this.position );
+    mat3.rotate( translation, translation, this.rotation * Math.PI / 180 );
+    mat3.scale( translation, translation, this.scale );
+
+    this.program.setUniformMat3f( "u_Matrix", translation );
 
     this.gl.drawElements( 
       this.gl.TRIANGLES, this.ibo.count, this.gl.UNSIGNED_INT, 0

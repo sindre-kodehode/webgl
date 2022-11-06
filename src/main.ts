@@ -23,21 +23,30 @@ const main = () => {
 
   ui.addSlider(
     "x",
-    () => rect.x,
+    () => rect.position[0],
     () => gl.canvas.width,
-    value => rect.x = value
+    value => rect.position[0] = value
   );
   ui.addSlider(
     "y",
-    () => rect.y,
+    () => rect.position[1],
     () => gl.canvas.height,
-    value => rect.y = value
+    value => rect.position[1] = value
   );
   ui.addSlider(
     "rotation",
     () => rect.rotation,
     () => 360,
     value => rect.rotation = value
+  );
+  ui.addSlider(
+    "scale",
+    () => rect.scale[0],
+    () => 1000,
+    value => {
+      rect.scale[0] = value;
+      rect.scale[1] = value;
+    }
   );
 
   scene.addGeometry( rect );

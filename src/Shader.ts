@@ -1,4 +1,4 @@
-import { mat4 } from "gl-matrix";
+import { mat3, mat4 } from "gl-matrix";
 
 export default class {
   gl               : WebGL2RenderingContext;
@@ -61,6 +61,16 @@ export default class {
     );
   }
 
+  setUniformMat3f(
+    name   : string,
+    matrix : mat3
+  ) {
+    this.gl.uniformMatrix3fv(
+      this.getUniformLocation( name ),
+      false,
+      matrix
+    );
+  }
   setUniformMat4f(
     name   : string,
     matrix : mat4
